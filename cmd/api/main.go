@@ -2,21 +2,32 @@ package api
 
 import (
 	"sync"
+	"time"
 
+	"github.com/BlackChaosNL/Orchestra/cmd/api/routes"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/kataras/golog"
 )
+
+var app *fiber.App
+
+const idleTimeout = 5 * time.Second
 
 func StartAPIServer(wg *sync.WaitGroup) {
 	defer wg.Done()
-	r := fiber.New()
+	app = fiber.New(fiber.Config{IdleTimeout: idleTimeout})
+	app.Use(golog.New())
+	app.Use(cors.New())
 
-	r.Group("/api/v1/")
+	g := app.Group("/api/v1/")
 
-	r.Get("/api/v1/", func(c fiber.Ctx) error {
-		return c.Status(200).JSON(&fiber.Map{
-			"ping": "pong!",
-		})
-	})
+	routes.GlobalRouter(g)
 
-	r.Listen(":8080")
+	golog.Fatal(app.Listen(":9810"))
+}
+
+func StopAPIService() {
+	app.Shutdown()
+	golog.Print("Test")
 }

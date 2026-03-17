@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -26,9 +26,6 @@ func main() {
 	var wg sync.WaitGroup
 	golog.Install(log.New(os.Stdout, "", 0))
 
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
-
 	wg.Add(2)
 
 	go api.StartAPIServer(&wg)
@@ -36,6 +33,9 @@ func main() {
 
 	wg.Wait()
 
-	<-ctx.Done()
-	golog.Print(context.Cause(ctx))
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	_ = <-c // Wait for signal from OS.Signal
+	api.StopAPIService()
+	fmt.Println("Gracefully shutting down...")
 }

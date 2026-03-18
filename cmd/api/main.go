@@ -7,6 +7,7 @@ import (
 	"github.com/BlackChaosNL/Orchestra/cmd/api/routes"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/gofiber/fiber/v3/middleware/responsetime"
 	"github.com/kataras/golog"
 )
 
@@ -17,8 +18,8 @@ const idleTimeout = 5 * time.Second
 func StartAPIServer(wg *sync.WaitGroup) {
 	defer wg.Done()
 	app = fiber.New(fiber.Config{IdleTimeout: idleTimeout})
-	app.Use(golog.New())
 	app.Use(cors.New())
+	app.Use(responsetime.New())
 
 	g := app.Group("/api/v1/")
 

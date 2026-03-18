@@ -1,16 +1,13 @@
 /* @refresh reload */
 import './index.css';
 import { render } from 'solid-js/web';
+import type { Component } from 'solid-js';
 import 'solid-devtools';
 
-import App from './App';
-
-const root = document.getElementById('root');
-
-if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
-  throw new Error(
-    'Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?',
+const App: Component = () => {
+  return (
+    <p class="text-4xl text-green-700 text-center py-20">Hello tailwind!</p>
   );
-}
+};
 
-render(() => <App />, root!);
+render(() => <App />, document.getElementById('root')!);

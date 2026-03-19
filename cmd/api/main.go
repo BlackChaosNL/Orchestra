@@ -1,6 +1,7 @@
 package api
 
 import (
+	"os"
 	"sync"
 	"time"
 
@@ -11,24 +12,33 @@ import (
 	"github.com/kataras/golog"
 )
 
-var app *fiber.App
+const idleTimeout time.Duration = 5 * time.Second
+const defaultPort string = ":9810"
 
-const idleTimeout = 5 * time.Second
+var userPort string = os.Getenv("ORCHESTRA_API_PORT")
+var app *fiber.App
 
 func StartAPIServer(wg *sync.WaitGroup) {
 	defer wg.Done()
+
 	app = fiber.New(fiber.Config{IdleTimeout: idleTimeout})
 	app.Use(cors.New())
 	app.Use(responsetime.New())
 
-	g := app.Group("/api/v1/")
+	// Set global group to /api, let routes choose version.
+	prefix := app.Group("/api")
 
-	routes.GlobalRouter(g)
+	routes.GlobalRouter(prefix)
 
-	golog.Fatal(app.Listen(":9810"))
+	golog.Fatal(app.Listen(func() string {
+		if userPort == "" {
+			return defaultPort
+		} else {
+			return userPort
+		}
+	}()))
 }
 
 func StopAPIService() {
 	app.Shutdown()
-	golog.Print("Test")
 }

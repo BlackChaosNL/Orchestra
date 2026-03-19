@@ -10,6 +10,8 @@ import (
 
 	"github.com/BlackChaosNL/Orchestra/cmd/api"
 	"github.com/BlackChaosNL/Orchestra/cmd/web"
+
+	"github.com/joho/godotenv"
 	"github.com/kataras/golog"
 )
 
@@ -25,6 +27,11 @@ INFO: Code organization: https://go.dev/doc/modules/layout
 func main() {
 	var wg sync.WaitGroup
 	golog.Install(log.New(os.Stdout, "", 0))
+
+	err := godotenv.Load()
+	if err != nil {
+		golog.Error(".env file not found, using default values. Skipping...")
+	}
 
 	wg.Add(2)
 

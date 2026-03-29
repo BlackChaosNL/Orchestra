@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/BlackChaosNL/Orchestra/config"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/extractors"
 	"github.com/gofiber/fiber/v3/middleware/cors"
@@ -12,13 +13,11 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/responsetime"
 	"github.com/gofiber/fiber/v3/middleware/session"
 	"github.com/gofiber/fiber/v3/middleware/static"
-	"github.com/kataras/golog"
 )
 
 const idleTimeout time.Duration = 5 * time.Second
-const defaultPort string = ":9800"
 
-var userPort string = os.Getenv("ORCHESTRA_WEB_PORT")
+var webAppPort string = config.Config("ORCHESTRA_WEB_PORT", ":9800")
 var sessionStore *session.Store
 
 var app *fiber.App
@@ -27,7 +26,12 @@ func StartWebServer(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	app = fiber.New(fiber.Config{IdleTimeout: idleTimeout})
-	app.Use(cors.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"}, //
+		AllowHeaders: []string{"Origin", "Content-Type", "Accept"},
+		AllowMethods: []string{"GET", "POST", "HEAD", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		Next:         nil,
+	}))
 	app.Use(csrf.New())
 	app.Use(responsetime.New())
 
@@ -55,15 +59,9 @@ func StartWebServer(wg *sync.WaitGroup) {
 		})
 	})
 
-	golog.Fatal(app.Listen(func() string {
-		if userPort == "" {
-			return defaultPort
-		} else {
-			return userPort
-		}
-	}()))
+	config.GetLogger().Fatal(app.Listen(webAppPort))
 }
 
-func StopAPIService() {
+func StopWebService() {
 	app.Shutdown()
 }

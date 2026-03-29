@@ -5,9 +5,9 @@ import (
 )
 
 func GlobalRouter(r fiber.Router) {
-	r.Group("/v1")
+	f := r.Group("/v1")
 
-	r.Get("/", func(c fiber.Ctx) error {
+	f.Get("/", func(c fiber.Ctx) error {
 		return c.Status(200).JSON(&fiber.Map{
 			"ping": "pong!",
 		})

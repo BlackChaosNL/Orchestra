@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"sync"
@@ -10,9 +8,7 @@ import (
 
 	"github.com/BlackChaosNL/Orchestra/cmd/api"
 	"github.com/BlackChaosNL/Orchestra/cmd/web"
-
-	"github.com/joho/godotenv"
-	"github.com/kataras/golog"
+	"github.com/BlackChaosNL/Orchestra/config"
 )
 
 /*
@@ -26,12 +22,6 @@ INFO: Code organization: https://go.dev/doc/modules/layout
 */
 func main() {
 	var wg sync.WaitGroup
-	golog.Install(log.New(os.Stdout, "", 0))
-
-	err := godotenv.Load()
-	if err != nil {
-		golog.Error(".env file not found, using default values. Skipping...")
-	}
 
 	wg.Add(2)
 
@@ -43,6 +33,9 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	_ = <-c // Wait for signal from OS.Signal
+
 	api.StopAPIService()
-	fmt.Println("Gracefully shutting down...")
+	web.StopWebService()
+
+	config.GetLogger().Info("Gracefully shutting down...")
 }

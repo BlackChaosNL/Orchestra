@@ -22,3 +22,4 @@ build-linux:
 	make remove-node-modules
 
 	@GOOS=linux go build -ldflags="-s -w" -o ./Orchestra ./*.go
+	@upx --brute ./Orchestra

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -10,15 +11,25 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/recover"
 	"github.com/gofiber/fiber/v3/middleware/responsetime"
+	"github.com/kataras/golog"
+	"github.com/opentofu/tofu-exec/tfexec"
 )
 
 const idleTimeout time.Duration = 5 * time.Second
 
 var apiAppPort string = config.Config("ORCHESTRA_API_PORT", ":9810")
+var tofu, tofuDir, workPath = config.GetTofu(config.Config("ORCHESTRA_API_TOFU_VERSION", "1.11.5"))
 var app *fiber.App
 
 func StartAPIServer(wg *sync.WaitGroup) {
 	defer wg.Done()
+
+	err := tofu.Init(context.Background(), tfexec.Upgrade(true))
+
+	if err != nil {
+		golog.Infof("Tofudir: %s", tofuDir)
+		golog.Fatalf("Error with OpenTofu: %s", err)
+	}
 
 	app = fiber.New(fiber.Config{IdleTimeout: idleTimeout})
 	app.Use(cors.New(cors.Config{
@@ -35,9 +46,11 @@ func StartAPIServer(wg *sync.WaitGroup) {
 
 	routes.GlobalRouter(prefix)
 
-	config.GetLogger().Fatal(app.Listen(apiAppPort))
+	golog.Fatal(app.Listen(apiAppPort))
 }
 
 func StopAPIService() {
 	app.Shutdown()
+	config.RemoveFolder(tofuDir)
+	config.RemoveFolder(workPath)
 }

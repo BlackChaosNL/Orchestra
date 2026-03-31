@@ -8,7 +8,7 @@ import (
 
 	"github.com/BlackChaosNL/Orchestra/cmd/api"
 	"github.com/BlackChaosNL/Orchestra/cmd/web"
-	"github.com/BlackChaosNL/Orchestra/config"
+	"github.com/kataras/golog"
 )
 
 /*
@@ -31,11 +31,11 @@ func main() {
 	wg.Wait()
 
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGABRT)
 	_ = <-c // Wait for signal from OS.Signal
 
 	api.StopAPIService()
 	web.StopWebService()
 
-	config.GetLogger().Info("Gracefully shutting down...")
+	golog.Info("Gracefully shutting down...")
 }

@@ -13,7 +13,6 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/responsetime"
 	"github.com/gofiber/fiber/v3/middleware/session"
 	"github.com/gofiber/fiber/v3/middleware/static"
-	"github.com/kataras/golog"
 )
 
 const idleTimeout time.Duration = 5 * time.Second
@@ -60,7 +59,7 @@ func StartWebServer(wg *sync.WaitGroup) {
 		})
 	})
 
-	golog.Fatal(app.Listen(webAppPort))
+	app.Listen(webAppPort)
 }
 
 func StopWebService() {

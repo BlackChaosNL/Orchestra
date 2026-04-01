@@ -18,7 +18,7 @@ import (
 const idleTimeout time.Duration = 5 * time.Second
 
 var apiAppPort string = config.Config("ORCHESTRA_API_PORT", ":9810")
-var tofu, tofuDir, workPath = config.GetTofu(config.Config("ORCHESTRA_API_TOFU_VERSION", "1.11.5"))
+var tofu, tofuDir, workPath = config.GetTofu(config.Config("ORCHESTRA_API_OPENTOFU_VERSION", "1.11.5"))
 var app *fiber.App
 
 func StartAPIServer(wg *sync.WaitGroup) {
@@ -46,7 +46,7 @@ func StartAPIServer(wg *sync.WaitGroup) {
 
 	routes.GlobalRouter(prefix)
 
-	golog.Fatal(app.Listen(apiAppPort))
+	app.Listen(apiAppPort)
 }
 
 func StopAPIService() {

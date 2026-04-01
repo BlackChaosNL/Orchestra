@@ -22,7 +22,7 @@ func PrepareTemporaryDictionary(dir string) string {
 
 func RemoveFolder(path string) {
 	err := os.RemoveAll(path)
-	if err == nil {
+	if err != nil {
 		golog.Fatalf("Can not remove the temporary folder... %s", err)
 	}
 }

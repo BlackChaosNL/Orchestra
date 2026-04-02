@@ -9,9 +9,9 @@ require (
 	github.com/opentofu/tofu-exec v0.0.2
 	github.com/opentofu/tofudl v0.0.1
 	github.com/tidwall/gjson v1.18.0
-	gorm.io/gorm v1.31.1
-	gorm.io/driver/sqlite v1.6.0
 	gorm.io/driver/postgres v1.6.0
+	gorm.io/driver/sqlite v1.6.0
+	gorm.io/gorm v1.31.1
 )
 
 require (
@@ -94,7 +94,4 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/postgres v1.6.0 // indirect
-	gorm.io/driver/sqlite v1.6.0 // indirect
-	gorm.io/gorm v1.31.1 // indirect
 )

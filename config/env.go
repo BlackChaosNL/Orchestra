@@ -1,26 +1,21 @@
 package config
 
 import (
-	"fmt"
 	"os"
-
-	"github.com/joho/godotenv"
+	"strconv"
 )
 
-func GetEnv(k string, d string) string {
+func GetStrFromEnv(k string, d string) string {
 	if os.Getenv(k) != "" {
 		return os.Getenv(k)
-	} else {
-		return d
 	}
+	return d
 }
 
-// Config function to get value from env file,
-func Config(k string, d string) string {
-	// load .env file
-	err := godotenv.Load(".env")
-	if err != nil {
-		fmt.Print("Error loading .env file")
+func GetBoolFromEnv(k string, d bool) bool {
+	if os.Getenv(k) != "" {
+		bool, _ := strconv.ParseBool(os.Getenv(k))
+		return bool
 	}
-	return GetEnv(k, d)
+	return d
 }

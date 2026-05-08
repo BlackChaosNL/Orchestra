@@ -17,8 +17,8 @@ import (
 
 const idleTimeout time.Duration = 5 * time.Second
 
-var webAppPort string = config.Config("ORCHESTRA_WEB_PORT", ":9800")
-var sessionStore *session.Store
+var webAppPort string = config.GetStrFromEnv("ORCHESTRA_WEB_PORT", ":9800")
+var sessionStore *session.Store = session.NewStore()
 
 var app *fiber.App
 
@@ -47,13 +47,13 @@ func StartWebServer(wg *sync.WaitGroup) {
 
 	app.Get("/assets*", static.New("", static.Config{
 		MaxAge:   31536000, // 1 year
-		FS:       os.DirFS("cmd/web/ui/dist/assets"),
-		Browse:   true,
+		FS:       os.DirFS("cmd/web/www/dist/assets"),
+		Browse:   false,
 		Compress: true,
 	}))
 
 	app.Get("/*", func(c fiber.Ctx) error {
-		return c.SendFile("cmd/web/ui/dist/index.html", fiber.SendFile{
+		return c.SendFile("cmd/web/www/dist/index.html", fiber.SendFile{
 			MaxAge:   0, // Force fresh index.
 			Compress: true,
 		})

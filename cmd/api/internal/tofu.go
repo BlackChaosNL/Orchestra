@@ -1,4 +1,4 @@
-package config
+package internal
 
 import (
 	"context"
@@ -11,21 +11,6 @@ import (
 	"github.com/opentofu/tofu-exec/tfexec"
 	"github.com/opentofu/tofudl"
 )
-
-func PrepareTemporaryDictionary(dir string) string {
-	tempDir, err := os.MkdirTemp("", dir)
-	if err != nil {
-		golog.Fatalf("Can not create a temporary folder... %s", err)
-	}
-	return tempDir
-}
-
-func RemoveFolder(path string) {
-	err := os.RemoveAll(path)
-	if err != nil {
-		golog.Fatalf("Can not remove the temporary folder... %s", err)
-	}
-}
 
 func DownloadTofu(tofuVersion string, dir string) string {
 	opts := tofudl.DownloadOptVersion(tofudl.Version(tofuVersion))

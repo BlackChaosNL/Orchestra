@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/BlackChaosNL/Orchestra/cmd/api/internal"
 	"github.com/BlackChaosNL/Orchestra/cmd/api/routes"
 	"github.com/BlackChaosNL/Orchestra/config"
 	"github.com/gofiber/fiber/v3"
@@ -17,8 +18,8 @@ import (
 
 const idleTimeout time.Duration = 5 * time.Second
 
-var apiAppPort string = config.Config("ORCHESTRA_API_PORT", ":9810")
-var tofu, tofuDir, workPath = config.GetTofu(config.Config("ORCHESTRA_API_OPENTOFU_VERSION", "1.11.5"))
+var apiAppPort string = config.GetStrFromEnv("ORCHESTRA_API_PORT", ":9810")
+var tofu, tofuDir, workPath = internal.GetTofu(config.GetStrFromEnv("ORCHESTRA_API_OPENTOFU_VERSION", "1.11.5"))
 var app *fiber.App
 
 func StartAPIServer(wg *sync.WaitGroup) {
@@ -51,6 +52,6 @@ func StartAPIServer(wg *sync.WaitGroup) {
 
 func StopAPIService() {
 	app.Shutdown()
-	config.RemoveFolder(tofuDir)
-	config.RemoveFolder(workPath)
+	internal.RemoveFolder(tofuDir)
+	internal.RemoveFolder(workPath)
 }

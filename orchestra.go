@@ -8,6 +8,7 @@ import (
 
 	"github.com/BlackChaosNL/Orchestra/cmd/api"
 	"github.com/BlackChaosNL/Orchestra/cmd/web"
+	"github.com/joho/godotenv"
 	"github.com/kataras/golog"
 )
 
@@ -21,6 +22,11 @@ TODO: Write usage.
 INFO: Code organization: https://go.dev/doc/modules/layout
 */
 func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		golog.Print("Error loading .env file")
+	}
+
 	var wg sync.WaitGroup
 
 	wg.Add(2)

@@ -1,17 +1,16 @@
 package internal
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/BlackChaosNL/Orchestra/cmd/api/models"
 	"github.com/BlackChaosNL/Orchestra/config"
-	"github.com/kataras/golog"
+	"github.com/mattn/go-sqlite3"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
-
-var DB *gorm.DB
 
 type Postgres struct {
 	host     string
@@ -26,34 +25,44 @@ type SQLite struct {
 	databasePath string
 }
 
-func SetupSQLite(s SQLite) *gorm.DB {
-	db, err := gorm.Open(sqlite.Open(s.databasePath), &gorm.Config{})
+func setupSQLite(s SQLite) *gorm.DB {
+	_, dir, file_name := GetLatestSqleanRelease()
+	const ext_name = "sqlite_ext"
+	sql.Register(ext_name,
+		&sqlite3.SQLiteDriver{
+			Extensions: []string{
+				fmt.Sprintf("%s/%s", dir, file_name),
+			},
+		},
+	)
 
-	if err != nil {
-		golog.Fatalf("Database can not be created... %s", err)
-	}
+	conn, _ := sql.Open(ext_name, s.databasePath)
+	db, _ := gorm.Open(sqlite.Dialector{
+		DriverName: ext_name,
+		DSN:        s.databasePath,
+		Conn:       conn,
+	}, &gorm.Config{
+		SkipDefaultTransaction:   true,
+		DisableNestedTransaction: true,
+	})
 
 	return db
 }
 
-func SetupPostgres(p Postgres) *gorm.DB {
+func setupPostgres(p Postgres) *gorm.DB {
 	dbString := fmt.Sprintf("user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=%s", p.user, p.password, p.dbname, p.port, p.TimeZone)
-	db, err := gorm.Open(postgres.New(postgres.Config{
+	db, _ := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dbString,
 		PreferSimpleProtocol: true, // disables implicit prepared statement usage
 	}), &gorm.Config{})
 
-	if err != nil {
-		golog.Fatalf("Connection can not be created... %s", err)
-	}
-
 	return db
 }
 
-func SetupDB() {
+func SetupDB() *gorm.DB {
 	isPostgresEnabled := config.GetBoolFromEnv("ORCHESTRA_API_POSTGRES_ENABLED", false)
 	if isPostgresEnabled {
-		DB = SetupPostgres(Postgres{
+		return setupPostgres(Postgres{
 			host:     config.GetStrFromEnv("ORCHESTRA_API_POSTGRES_HOST", "postgres"),
 			user:     config.GetStrFromEnv("ORCHESTRA_API_POSTGRES_USER", "postgres"),
 			password: config.GetStrFromEnv("ORCHESTRA_API_POSTGRES_PASSWORD", "postgres"),
@@ -62,20 +71,15 @@ func SetupDB() {
 			TimeZone: config.GetStrFromEnv("ORCHESTRA_API_POSTGRES_TIMEZONE", "Etc/UTC"),
 		})
 	} else {
-		DB = SetupSQLite(SQLite{databasePath: config.GetStrFromEnv("ORCHESTRA_API_SQLITE_DATABASE_PATH", "./db/sqlite.sqlite3")})
+		return setupSQLite(SQLite{databasePath: config.GetStrFromEnv("ORCHESTRA_API_SQLITE_DATABASE_PATH", "./sqlite.sqlite3")})
 	}
 }
 
-func LoadTables() {
-	Migrate(
-		&models.User{},
-		&models.Group{},
-		&models.Membership{},
-		&models.Setting{},
-	)
-	DB.SetupJoinTable(&models.User{}, "Groups", &models.Membership{})
-}
+func LoadTables(db *gorm.DB) {
+	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Group{})
+	db.AutoMigrate(&models.Membership{})
+	db.AutoMigrate(&models.Setting{})
 
-func Migrate(tables ...any) error {
-	return DB.AutoMigrate(tables...)
+	db.SetupJoinTable(&models.User{}, "Groups", &models.Membership{})
 }

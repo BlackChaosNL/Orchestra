@@ -1,22 +1,22 @@
 package internal
 
 import (
+	"fmt"
 	"os"
-
-	"github.com/kataras/golog"
 )
 
-func PrepareTemporaryDictionary(dir string) string {
+func PrepareTemporaryDictionary(dir string) (error, string) {
 	tempDir, err := os.MkdirTemp("", dir)
 	if err != nil {
-		golog.Fatalf("Can not create a temporary folder... %s", err)
+		return fmt.Errorf("Can not create a temporary folder... %s", err), ""
 	}
-	return tempDir
+	return nil, tempDir
 }
 
-func RemoveFolder(path string) {
+func RemoveFolder(path string) error {
 	err := os.RemoveAll(path)
 	if err != nil {
-		golog.Fatalf("Can not remove the temporary folder... %s", err)
+		return fmt.Errorf("Can not remove the temporary folder... %s", err)
 	}
+	return nil
 }

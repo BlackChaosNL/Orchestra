@@ -110,6 +110,8 @@ All marked user stories are implemented, those that are not are WIP.
 - [ ] As the owner of the service I want to make it simple to deploy on my own server via a container.
 - [ ] As the owner of the service I want to be able to check the logs for any suspicious behaviour with services.
 - [ ] As the owner of the service I want to ban access from countries/vpns that are known for hacking services.
+- [X] As the owner of the service I wish to host orchestra in a container.
+- [X] As the owner of the service I would like to choose which database I save my user's settings and preferences.
 
 ### Other
 - [ ] As an \{\$ACTOR\} I want \{\$FUNCTION\} because {$REASON}

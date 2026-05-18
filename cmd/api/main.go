@@ -1,19 +1,16 @@
 package api
 
 import (
-	"context"
 	"sync"
 	"time"
 
 	"github.com/BlackChaosNL/Orchestra/cmd/api/internal"
-	"github.com/BlackChaosNL/Orchestra/cmd/api/routes"
+	"github.com/BlackChaosNL/Orchestra/cmd/api/router"
 	"github.com/BlackChaosNL/Orchestra/config"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/recover"
 	"github.com/gofiber/fiber/v3/middleware/responsetime"
-	"github.com/kataras/golog"
-	"github.com/opentofu/tofu-exec/tfexec"
 )
 
 const idleTimeout time.Duration = 5 * time.Second
@@ -25,12 +22,8 @@ var app *fiber.App
 func StartAPIServer(wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	err := tofu.Init(context.Background(), tfexec.Upgrade(true))
-
-	if err != nil {
-		golog.Infof("Tofudir: %s", tofuDir)
-		golog.Fatalf("Error with OpenTofu: %s", err)
-	}
+	db := internal.SetupDB()
+	internal.LoadTables(db)
 
 	app = fiber.New(fiber.Config{IdleTimeout: idleTimeout})
 	app.Use(cors.New(cors.Config{
@@ -43,9 +36,9 @@ func StartAPIServer(wg *sync.WaitGroup) {
 	app.Use(responsetime.New())
 
 	// Set global group to /api, let routes choose version.
-	prefix := app.Group("/api")
-
-	routes.GlobalRouter(prefix)
+	app.Group("/api")
+	r := router.CreateRouter(app, db)
+	r.SetupRoutes()
 
 	app.Listen(apiAppPort)
 }

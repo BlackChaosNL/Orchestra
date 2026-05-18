@@ -1,20 +1,28 @@
 package middleware
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/BlackChaosNL/Orchestra/config"
 	"github.com/gofiber/fiber/v3"
-	"github.com/kataras/golog"
 
 	jwtware "github.com/gofiber/contrib/v3/jwt"
 )
+
+func Protected() fiber.Handler {
+
+}
+
+func OAUTHProtected() fiber.Handler {
+
+}
 
 func JWTProtected() fiber.Handler {
 	secret := config.GetStrFromEnv("ORCHESTRA_API_SECRET_KEY", "")
 
 	if secret == "" {
-		golog.Fatal("")
+		fmt.Errorf("ORCHESTRA_API_SECRET_KEY has not been properly filled.")
 	}
 
 	return jwtware.New(jwtware.Config{

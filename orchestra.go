@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"sync"
@@ -9,7 +10,6 @@ import (
 	"github.com/BlackChaosNL/Orchestra/cmd/api"
 	"github.com/BlackChaosNL/Orchestra/cmd/web"
 	"github.com/joho/godotenv"
-	"github.com/kataras/golog"
 )
 
 /*
@@ -24,7 +24,7 @@ INFO: Code organization: https://go.dev/doc/modules/layout
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		golog.Print("Error loading .env file")
+		fmt.Errorf("Error loading .env file")
 	}
 
 	var wg sync.WaitGroup
@@ -43,5 +43,5 @@ func main() {
 	api.StopAPIService()
 	web.StopWebService()
 
-	golog.Info("Gracefully shutting down...")
+	fmt.Print("Gracefully shutting down...")
 }
